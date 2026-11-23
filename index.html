@@ -79,12 +79,11 @@
     border-radius:1.3cqw;display:flex;align-items:center;gap:1.1cqw;padding:0 1.1cqw;
     box-shadow:0 .4cqw 1.2cqw rgba(11,45,115,.15);
   }
-  .card:first-child{flex:.95}.card:nth-child(2){flex:1.35}.card:nth-child(5){flex:1.2}
   .ico{width:5cqw;height:5cqw;border-radius:50%;background:linear-gradient(180deg,#1f6fe0,#0d4cb5);display:flex;align-items:center;justify-content:center;flex:none}
   .ico svg{width:56%;height:56%}
   .sep{width:.15cqw;height:5.4cqw;background:var(--navy);flex:none}
-  .txt{min-width:0}
-  .k{font-weight:700;font-size:1.65cqw;line-height:1.2}
+  .txt{min-width:0;flex:1}
+  .k{font-weight:700;font-size:1.65cqw;line-height:1.2;white-space:nowrap;overflow:hidden}
   .v{font-weight:800;font-size:2.35cqw;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
   /* Loading / error */
@@ -153,7 +152,7 @@
 
 <script>
   // ====== GANTI URL INI dengan URL Web App Google Apps Script Anda ======
-  const API_URL = "https://script.google.com/macros/s/AKfycbxVWdvJ1CQ04Yv3GnP3IaqdgPn7LJ8kJIYiLXOGySv92KZ2yPTkmH3I1JpJfkIw3bBu/exec";
+  const API_URL = "URL_GAS_ANDA_DISINI";
   // Interval pembaruan otomatis data (ms). Isi 0 untuk menonaktifkan.
   const REFRESH_MS = 30000;
 
@@ -197,6 +196,35 @@
     }
   }
 
+  /* ---------- Auto-fit token & teks kartu ---------- */
+  function fitToken(){
+    const el = $("token"), card = el.parentElement, n = el.textContent.length || 1;
+    el.style.letterSpacing = ""; el.style.paddingLeft = ""; el.style.fontSize = "100px";
+    const w = el.getBoundingClientRect().width;
+    const target = card.clientWidth * 0.96;
+    const byW = 100 * target / w, byH = card.clientHeight * 0.86;
+    const size = Math.min(byW, byH);
+    el.style.fontSize = size + "px";
+    if(byH < byW){
+      const extra = Math.min((target - w * size / 100) / (n + 1), size * 0.2);
+      const ls = size * 0.06 + extra;
+      el.style.letterSpacing = ls + "px"; el.style.paddingLeft = ls + "px";
+    }
+  }
+  function fitText(el){
+    el.style.fontSize = "";
+    const cw = el.clientWidth, sw = el.scrollWidth;
+    if(cw > 0 && sw > cw){
+      el.style.fontSize = (parseFloat(getComputedStyle(el).fontSize) * cw / sw * 0.98) + "px";
+    }
+  }
+  function fitAll(){
+    fitToken();
+    document.querySelectorAll(".card .k, .card .v").forEach(fitText);
+  }
+  window.addEventListener("resize", fitAll);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
+
   /* ---------- Ambil data dari GAS ---------- */
   let hasData = false;
   async function loadData(){
@@ -209,7 +237,7 @@
       if(json.error) throw new Error(json.error);
       const data = json.data || json;
       if(!data || !Object.keys(data).length || !data.token) throw new Error("Data kosong di sheet \"data\" baris ke-2.");
-      render(data); hasData = true;
+      render(data); fitAll(); hasData = true;
       setStatus("Data diperbarui");
     }catch(err){
       console.error("Gagal memuat data:", err);
