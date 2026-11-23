@@ -58,9 +58,14 @@
   .logo-ph{width:8cqw;height:8cqw;border-radius:50%;background:#dbe9fb;flex:none}
   .divider{width:.18cqw;height:5cqw;background:var(--navy);flex:none}
   .school{flex:1;font-weight:800;font-size:3.3cqw;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
+  .school-block{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:.35cqw}
+  .school-block .school{flex:none;font-size:3cqw;line-height:1.1}
+  .school-sub{font-weight:600;font-size:1.55cqw;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .school-sub:empty{display:none}
   .clock-wrap{display:flex;align-items:center;gap:1.4cqw;border-left:.18cqw solid var(--navy);padding-left:2.2cqw;height:5cqw}
   .clock-ico{width:3.3cqw;height:3.3cqw;flex:none}
   .time{font-weight:800;font-size:3.2cqw;line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+  .sec{color:#14a44d}
   .date{font-weight:600;font-size:1.45cqw;margin-top:.5cqw;white-space:nowrap}
 
   /* Label TOKEN */
@@ -81,6 +86,21 @@
     box-shadow:0 .8cqw 2cqw rgba(11,45,115,.2);
   }
   .token{font-weight:900;font-size:12.6cqw;letter-spacing:.06em;padding-left:.06em;line-height:1;white-space:nowrap;color:#d7141f}
+
+  /* Label TOKEN BARU & efek token baru */
+  .label{position:relative}
+  .label::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#e0222d,#b30f19);opacity:0;transition:opacity .5s}
+  .label.baru::before{opacity:1}
+  .token-card.blink{animation:cardBlink 1s ease-in-out 10}
+  .token-card.blink .token{animation:tokBlink 1s ease-in-out 10}
+  @keyframes tokBlink{
+    0%,50%{opacity:1;transform:scale(1.02);filter:drop-shadow(0 0 1.4cqw rgba(215,20,31,.55))}
+    62%,100%{opacity:.18;transform:scale(1);filter:drop-shadow(0 0 0 rgba(215,20,31,0))}
+  }
+  @keyframes cardBlink{
+    0%,50%{border-color:#d7141f;box-shadow:0 0 0 .5cqw rgba(215,20,31,.25),0 0 3cqw rgba(215,20,31,.55)}
+    62%,100%{border-color:#3b8ff0;box-shadow:0 .8cqw 2cqw rgba(11,45,115,.2)}
+  }
 
   /* Kartu info */
   .info{position:absolute;left:1.4cqw;right:1.4cqw;top:41.6cqw;height:8.3cqw;display:flex;gap:1cqw}
@@ -114,7 +134,11 @@
     <img class="logo" id="logo" alt="Logo sekolah" hidden>
     <div class="logo-ph" id="logoPh"></div>
     <div class="divider"></div>
-    <div class="school skeleton" id="namaSekolah">Memuat data...</div>
+    <div class="school-block">
+      <div class="school skeleton" id="namaSekolah">Memuat data...</div>
+      <div class="school-sub" id="alamatSekolah"></div>
+      <div class="school-sub" id="npsnSekolah"></div>
+    </div>
     <div class="clock-wrap">
       <svg class="clock-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1565d8"/><path d="M12 5v7h5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <div>
@@ -164,7 +188,7 @@
   // ====== GANTI URL INI dengan URL Web App Google Apps Script Anda ======
   const API_URL = "https://script.google.com/macros/s/AKfycbxVWdvJ1CQ04Yv3GnP3IaqdgPn7LJ8kJIYiLXOGySv92KZ2yPTkmH3I1JpJfkIw3bBu/exec";
   // Interval pembaruan otomatis data (ms). Isi 0 untuk menonaktifkan.
-  const REFRESH_MS = 30000;
+  const REFRESH_MS = 15000;
 
   const $ = id => document.getElementById(id);
   const HARI = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
@@ -173,7 +197,7 @@
   /* ---------- Jam & tanggal real-time ---------- */
   function tick(){
     const d = new Date(), p = n => String(n).padStart(2,"0");
-    $("clock").textContent = `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+    $("clock").innerHTML = `${p(d.getHours())}:${p(d.getMinutes())}:<span class="sec">${p(d.getSeconds())}</span>`;
     $("date").textContent = `${HARI[d.getDay()]}, ${p(d.getDate())} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
   }
   tick(); setInterval(tick, 1000);
@@ -198,6 +222,8 @@
       el.classList.remove("skeleton");
       el.textContent = (val === undefined || val === null || String(val).trim() === "") ? "-" : String(val).trim();
     }
+    $("alamatSekolah").textContent = String(data.alamat_sekolah ?? "").trim();
+    $("npsnSekolah").textContent = String(data.npsn ?? "").trim();
     if(data.url_logo){
       const img = $("logo");
       img.onload = () => { img.hidden = false; $("logoPh").hidden = true; };
@@ -230,10 +256,22 @@
   }
   function fitAll(){
     fitToken();
-    document.querySelectorAll(".card .k, .card .v").forEach(fitText);
+    document.querySelectorAll(".card .k, .card .v, .school-sub").forEach(fitText);
   }
   window.addEventListener("resize", fitAll);
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
+
+  /* ---------- Efek token baru ---------- */
+  let lastToken = null, newTokenTimers = [];
+  function announceNewToken(){
+    const card = $("token").parentElement, label = document.querySelector(".label");
+    newTokenTimers.forEach(clearTimeout); newTokenTimers = [];
+    card.classList.remove("blink"); label.classList.remove("baru"); label.textContent = "TOKEN";
+    const wait = 1000 - (Date.now() % 1000); // mulai tepat di pergantian detik
+    newTokenTimers.push(setTimeout(() => { void card.offsetWidth; card.classList.add("blink"); }, wait));
+    newTokenTimers.push(setTimeout(() => { card.classList.remove("blink"); label.textContent = "TOKEN BARU"; label.classList.add("baru"); }, wait + 10000));
+    newTokenTimers.push(setTimeout(() => { label.textContent = "TOKEN"; label.classList.remove("baru"); }, wait + 20000));
+  }
 
   /* ---------- Ambil data dari GAS ---------- */
   let hasData = false;
@@ -247,8 +285,11 @@
       if(json.error) throw new Error(json.error);
       const data = json.data || json;
       if(!data || !Object.keys(data).length || !data.token) throw new Error("Data kosong di sheet \"data\" baris ke-2.");
-      render(data); fitAll(); hasData = true;
-      setStatus("Data diperbarui");
+      const newToken = String(data.token).trim();
+      render(data); fitAll();
+      if(lastToken !== null && newToken !== lastToken) announceNewToken();
+      lastToken = newToken; hasData = true;
+      $("status").classList.add("hide");
     }catch(err){
       console.error("Gagal memuat data:", err);
       setStatus(hasData ? "Gagal memperbarui data, menampilkan data terakhir" : `Gagal memuat data: ${err.message}`, true);
