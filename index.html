@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Asesmen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0b2d73; --blue:#1565d8; --blue2:#2f8cf0; --sky:#cfe6fb;
+    --white:#fff; --orange:#f7a11a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:#06204f;font-family:'Montserrat','Poppins',sans-serif}
+  body{display:flex;align-items:center;justify-content:center}
+
+  /* Stage 16:9 — semua ukuran memakai cqw (persen lebar stage) */
+  .stage{
+    position:relative; width:min(100vw, calc(100vh * 16 / 9)); aspect-ratio:16/9;
+    container-type:size; overflow:hidden; color:var(--navy);
+    background:linear-gradient(180deg,#e9f4ff 0%,#bcdcfa 40%,#8fc3f5 100%);
+  }
+  /* siluet gedung & pohon */
+  .stage::before{
+    content:""; position:absolute; left:0; right:0; bottom:0; height:62%;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 500' preserveAspectRatio='none'%3E%3Cg fill='%232f7fd6' fill-opacity='.22'%3E%3Cpath d='M0 500V330l60-10 30-50h340v40h140V200h380v60h200v-40h260v280z'/%3E%3Cpath d='M1380 500V300l40-30 40 30v200zM30 500V360q40-90 80 0v140z'/%3E%3C/g%3E%3Cg fill='%23ffffff' fill-opacity='.35'%3E%3Cpath d='M140 290h40v18h-40zM220 290h40v18h-40zM300 290h40v18h-40zM380 290h40v18h-40zM660 230h40v18h-40zM740 230h40v18h-40zM820 230h40v18h-40zM900 230h40v18h-40zM980 230h40v18h-40zM1060 230h40v18h-40zM1140 230h40v18h-40zM140 340h40v18h-40zM220 340h40v18h-40zM300 340h40v18h-40zM380 340h40v18h-40zM660 290h40v18h-40zM740 290h40v18h-40zM820 290h40v18h-40zM900 290h40v18h-40zM980 290h40v18h-40zM1060 290h40v18h-40zM1140 290h40v18h-40z'/%3E%3C/g%3E%3C/svg%3E") center bottom/100% 100% no-repeat;
+    pointer-events:none;
+  }
+
+  /* Aksen sudut */
+  .top-bar{position:absolute;top:0;left:0;right:0;height:3.2cqw;background:linear-gradient(90deg,#0b4fb3,#1b7be6 60%,#2a93f2)}
+  .top-bar::after{content:"";position:absolute;right:0;top:0;width:20cqw;height:100%;
+    background:linear-gradient(115deg,transparent 0 40%,#12408f 40% 62%,var(--orange) 62% 80%,#fff 80% 83%,#2a93f2 83%)}
+  .bot-bar{position:absolute;left:0;right:0;bottom:0;height:3.6cqw;background:linear-gradient(180deg,#1b6fd6,#0b3a8c);border-top:.25cqw solid rgba(255,255,255,.7)}
+  .corner-or{position:absolute;left:0;bottom:0;width:18cqw;height:6.2cqw;background:var(--orange);clip-path:polygon(0 0,38% 0,100% 100%,0 100%)}
+  .corner-or::after{content:"";position:absolute;inset:0;background:#fff;clip-path:polygon(40% 0,43% 0,100% 100%,97% 100%);opacity:.9}
+
+  /* Header */
+  .header{
+    position:absolute;top:2.8cqw;left:0;right:0;height:9.2cqw;
+    display:flex;align-items:center;padding:0 2.4cqw 0 4cqw;gap:2.2cqw;
+    background:linear-gradient(90deg,rgba(255,255,255,.97),rgba(235,246,255,.95));
+    border-radius:0 0 3cqw 0; box-shadow:0 .6cqw 1.6cqw rgba(11,45,115,.18);
+  }
+  .logo{width:5.6cqw;height:5.6cqw;object-fit:contain;flex:none}
+  .logo-ph{width:5.6cqw;height:5.6cqw;border-radius:50%;background:#dbe9fb;flex:none}
+  .divider{width:.18cqw;height:5cqw;background:var(--navy);flex:none}
+  .school{flex:1;font-weight:800;font-size:3.3cqw;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
+  .clock-wrap{display:flex;align-items:center;gap:1.4cqw;border-left:.18cqw solid var(--navy);padding-left:2.2cqw;height:5cqw}
+  .clock-ico{width:3.3cqw;height:3.3cqw;flex:none}
+  .time{font-weight:800;font-size:3.2cqw;line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+  .date{font-weight:600;font-size:1.45cqw;margin-top:.5cqw;white-space:nowrap}
+
+  /* Label TOKEN */
+  .label-row{position:absolute;top:14.6cqw;left:0;right:0;height:5cqw;display:flex;align-items:flex-end;justify-content:center}
+  .label-row::before,.label-row::after{content:"";flex:1;height:.14cqw;background:var(--blue);margin:0 2cqw 1.7cqw;opacity:.85}
+  .label-row::before{margin-left:4.5cqw}.label-row::after{margin-right:4.5cqw}
+  .label{
+    background:linear-gradient(180deg,#1a58c2,#0c3a91);color:#fff;font-weight:800;font-size:3.1cqw;
+    padding:.8cqw 7cqw .6cqw;border-radius:2.4cqw 2.4cqw 0 0;letter-spacing:.02em;line-height:1.25;
+    clip-path:polygon(4% 0,96% 0,100% 100%,0 100%);
+  }
+
+  /* Kartu token */
+  .token-card{
+    position:absolute;top:19.2cqw;left:4.4cqw;right:4.4cqw;height:18.6cqw;
+    background:#fff;border:.2cqw solid #3b8ff0;border-radius:2cqw;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 .8cqw 2cqw rgba(11,45,115,.2);
+  }
+  .token{font-weight:900;font-size:12.6cqw;letter-spacing:.06em;padding-left:.06em;line-height:1;white-space:nowrap;color:var(--navy)}
+
+  /* Kartu info */
+  .info{position:absolute;left:1.4cqw;right:1.4cqw;top:41.6cqw;height:8.3cqw;display:flex;gap:1cqw}
+  .card{
+    flex:1 1 0;min-width:0;background:linear-gradient(180deg,#fff,#eef6ff);border:.15cqw solid #a9d0fb;
+    border-radius:1.3cqw;display:flex;align-items:center;gap:1.1cqw;padding:0 1.1cqw;
+    box-shadow:0 .4cqw 1.2cqw rgba(11,45,115,.15);
+  }
+  .card:first-child{flex:.95}.card:nth-child(2){flex:1.35}.card:nth-child(5){flex:1.2}
+  .ico{width:5cqw;height:5cqw;border-radius:50%;background:linear-gradient(180deg,#1f6fe0,#0d4cb5);display:flex;align-items:center;justify-content:center;flex:none}
+  .ico svg{width:56%;height:56%}
+  .sep{width:.15cqw;height:5.4cqw;background:var(--navy);flex:none}
+  .txt{min-width:0}
+  .k{font-weight:700;font-size:1.65cqw;line-height:1.2}
+  .v{font-weight:800;font-size:2.35cqw;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* Loading / error */
+  .skeleton{color:transparent!important;position:relative;background:linear-gradient(90deg,#dbe8f8 25%,#f0f6fd 50%,#dbe8f8 75%);background-size:200% 100%;animation:sh 1.2s infinite;border-radius:.6cqw}
+  @keyframes sh{to{background-position:-200% 0}}
+  .status{position:absolute;left:50%;transform:translateX(-50%);bottom:4.4cqw;font-weight:700;font-size:1.3cqw;
+    padding:.4cqw 1.6cqw;border-radius:2cqw;background:#fff;color:var(--navy);box-shadow:0 .3cqw 1cqw rgba(0,0,0,.15);transition:opacity .3s}
+  .status.error{background:#fde8e8;color:#9b1c1c}
+  .status.hide{opacity:0;pointer-events:none}
+  @media (prefers-reduced-motion:reduce){.skeleton{animation:none}}
+</style>
+</head>
+<body>
+<main class="stage" id="stage">
+  <div class="top-bar"></div>
+
+  <header class="header">
+    <img class="logo" id="logo" alt="Logo sekolah" hidden>
+    <div class="logo-ph" id="logoPh"></div>
+    <div class="divider"></div>
+    <div class="school skeleton" id="namaSekolah">Memuat data...</div>
+    <div class="clock-wrap">
+      <svg class="clock-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1565d8"/><path d="M12 5v7h5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div>
+        <div class="time" id="clock">00:00:00</div>
+        <div class="date" id="date">&nbsp;</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="label-row"><div class="label">TOKEN</div></div>
+
+  <section class="token-card"><div class="token skeleton" id="token">------</div></section>
+
+  <section class="info">
+    <div class="card">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"><path d="M12 6C9.5 4.5 6.5 4.2 3 4.8v13c3.5-.6 6.5-.3 9 1.2 2.5-1.5 5.5-1.8 9-1.2v-13c-3.5-.6-6.500-.3-9 1.200zM12 6v13"/></svg></div>
+      <div class="sep"></div>
+      <div class="txt"><div class="k">Kegiatan:</div><div class="v skeleton" id="namaKegiatan">Memuat</div></div>
+    </div>
+    <div class="card">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><path d="M3 8q2.250-2 4.500 0t4.500 0 4.500 0 4.500 0M3 12.500q2.250-2 4.500 0t4.500 0 4.500 0 4.500 0M3 17q2.250-2 4.500 0t4.500 0 4.500 0 4.500 0"/></svg></div>
+      <div class="sep"></div>
+      <div class="txt"><div class="k">Gelombang:</div><div class="v skeleton" id="gelombang">Memuat</div></div>
+    </div>
+    <div class="card">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"><path d="M6 21V4l10-2v19M6 21h13M16 6h3v15M13 12v.5" stroke-linecap="round"/></svg></div>
+      <div class="sep"></div>
+      <div class="txt"><div class="k">Ruang:</div><div class="v skeleton" id="ruang">Memuat</div></div>
+    </div>
+    <div class="card">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+      <div class="sep"></div>
+      <div class="txt"><div class="k">Sesi:</div><div class="v skeleton" id="sesi">Memuat</div></div>
+    </div>
+    <div class="card">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="#fff"><circle cx="12" cy="8" r="3"/><circle cx="5.500" cy="9.500" r="2.200"/><circle cx="18.500" cy="9.500" r="2.200"/><path d="M6.500 19c0-3.300 2.500-5.500 5.500-5.500s5.500 2.200 5.500 5.500zM1 18c0-2.400 1.700-4 4.200-4 .9 0 1.700.2 2.300.6-1 1-1.600 2.300-1.800 3.400zM23 18c0-2.400-1.700-4-4.200-4-.9 0-1.700.2-2.300.6 1 1 1.600 2.300 1.800 3.400z"/></svg></div>
+      <div class="sep"></div>
+      <div class="txt"><div class="k">Peserta:</div><div class="v skeleton" id="jumlahPeserta">Memuat</div></div>
+    </div>
+  </section>
+
+  <div class="bot-bar"></div><div class="corner-or"></div>
+  <div class="status" id="status">Memuat data...</div>
+</main>
+
+<script>
+  // ====== GANTI URL INI dengan URL Web App Google Apps Script Anda ======
+  const API_URL = "URL_GAS_ANDA_DISINI";
+  // Interval pembaruan otomatis data (ms). Isi 0 untuk menonaktifkan.
+  const REFRESH_MS = 30000;
+
+  const $ = id => document.getElementById(id);
+  const HARI = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+  const BULAN = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+
+  /* ---------- Jam & tanggal real-time ---------- */
+  function tick(){
+    const d = new Date(), p = n => String(n).padStart(2,"0");
+    $("clock").textContent = `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+    $("date").textContent = `${HARI[d.getDay()]}, ${p(d.getDate())} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
+  }
+  tick(); setInterval(tick, 1000);
+
+  /* ---------- Status ---------- */
+  let statusTimer;
+  function setStatus(msg, isError){
+    const s = $("status");
+    s.textContent = msg; s.classList.toggle("error", !!isError); s.classList.remove("hide");
+    clearTimeout(statusTimer);
+    if(!isError) statusTimer = setTimeout(() => s.classList.add("hide"), 1200);
+  }
+
+  /* ---------- Render data ke UI ---------- */
+  const FIELDS = {
+    nama_sekolah:"namaSekolah", token:"token", nama_kegiatan:"namaKegiatan",
+    gelombang:"gelombang", ruang:"ruang", sesi:"sesi", jumlah_peserta:"jumlahPeserta"
+  };
+  function render(data){
+    for(const [key, id] of Object.entries(FIELDS)){
+      const el = $(id), val = data[key];
+      el.classList.remove("skeleton");
+      el.textContent = (val === undefined || val === null || String(val).trim() === "") ? "-" : String(val).trim();
+    }
+    if(data.url_logo){
+      const img = $("logo");
+      img.onload = () => { img.hidden = false; $("logoPh").hidden = true; };
+      img.onerror = () => { img.hidden = true; $("logoPh").hidden = false; };
+      img.src = data.url_logo;
+    }
+  }
+
+  /* ---------- Ambil data dari GAS ---------- */
+  let hasData = false;
+  async function loadData(){
+    try{
+      if(!API_URL || API_URL.includes("URL_GAS_ANDA_DISINI")) throw new Error("API_URL belum diisi.");
+      const sep = API_URL.includes("?") ? "&" : "?";
+      const res = await fetch(`${API_URL}${sep}t=${Date.now()}`, {method:"GET", redirect:"follow", cache:"no-store"});
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      if(json.error) throw new Error(json.error);
+      const data = json.data || json;
+      if(!data || !Object.keys(data).length || !data.token) throw new Error("Data kosong di sheet \"data\" baris ke-2.");
+      render(data); hasData = true;
+      setStatus("Data diperbarui");
+    }catch(err){
+      console.error("Gagal memuat data:", err);
+      setStatus(hasData ? "Gagal memperbarui data, menampilkan data terakhir" : `Gagal memuat data: ${err.message}`, true);
+    }
+  }
+  loadData();
+  if(REFRESH_MS > 0) setInterval(loadData, REFRESH_MS);
+</script>
+</body>
+</html>
