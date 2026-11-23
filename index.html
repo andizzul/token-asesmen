@@ -44,8 +44,8 @@
     background:linear-gradient(90deg,rgba(255,255,255,.97),rgba(235,246,255,.95));
     border-radius:0 0 3cqw 0; box-shadow:0 .6cqw 1.6cqw rgba(11,45,115,.18);
   }
-  .logo{width:5.6cqw;height:5.6cqw;object-fit:contain;flex:none}
-  .logo-ph{width:5.6cqw;height:5.6cqw;border-radius:50%;background:#dbe9fb;flex:none}
+  .logo{width:8cqw;height:8cqw;object-fit:contain;flex:none}
+  .logo-ph{width:8cqw;height:8cqw;border-radius:50%;background:#dbe9fb;flex:none}
   .divider{width:.18cqw;height:5cqw;background:var(--navy);flex:none}
   .school{flex:1;font-weight:800;font-size:3.3cqw;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase}
   .clock-wrap{display:flex;align-items:center;gap:1.4cqw;border-left:.18cqw solid var(--navy);padding-left:2.2cqw;height:5cqw}
@@ -70,7 +70,7 @@
     display:flex;align-items:center;justify-content:center;
     box-shadow:0 .8cqw 2cqw rgba(11,45,115,.2);
   }
-  .token{font-weight:900;font-size:12.6cqw;letter-spacing:.06em;padding-left:.06em;line-height:1;white-space:nowrap;color:var(--navy)}
+  .token{font-weight:900;font-size:12.6cqw;letter-spacing:.06em;padding-left:.06em;line-height:1;white-space:nowrap;color:#d7141f}
 
   /* Kartu info */
   .info{position:absolute;left:1.4cqw;right:1.4cqw;top:41.6cqw;height:8.3cqw;display:flex;gap:1cqw}
@@ -84,7 +84,7 @@
   .sep{width:.15cqw;height:5.4cqw;background:var(--navy);flex:none}
   .txt{min-width:0;flex:1}
   .k{font-weight:700;font-size:1.65cqw;line-height:1.2;white-space:nowrap;overflow:hidden}
-  .v{font-weight:800;font-size:2.35cqw;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .v{font-weight:800;font-size:2.35cqw;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e4600a;text-align:center}
 
   /* Loading / error */
   .skeleton{color:transparent!important;position:relative;background:linear-gradient(90deg,#dbe8f8 25%,#f0f6fd 50%,#dbe8f8 75%);background-size:200% 100%;animation:sh 1.2s infinite;border-radius:.6cqw}
@@ -180,7 +180,7 @@
   /* ---------- Render data ke UI ---------- */
   const FIELDS = {
     nama_sekolah:"namaSekolah", token:"token", nama_kegiatan:"namaKegiatan",
-    gelombang:"gelombang", ruang:"ruang", sesi:"sesi", jumlah_peserta:"jumlahPeserta"
+    gelombang:"gelombang", ruangan:"ruang", sesi:"sesi", jumlah_peserta:"jumlahPeserta"
   };
   function render(data){
     for(const [key, id] of Object.entries(FIELDS)){
