@@ -43,10 +43,17 @@
   .top-bar::after{content:"";position:absolute;right:0;top:0;width:20cqw;height:100%;
     background:linear-gradient(115deg,transparent 0 40%,#12408f 40% 62%,var(--orange) 62% 80%,#fff 80% 83%,#2a93f2 83%)}
   .bot-bar{position:absolute;left:0;right:0;bottom:0;height:3.6cqw;background:linear-gradient(180deg,#1b6fd6,#0b3a8c);border-top:.25cqw solid rgba(255,255,255,.7)}
-  /* Pita oranye mata pelajaran: satu elemen dari tepi kiri layar, tanpa sambungan di batas stage */
-  .ribbon{position:fixed;left:0;bottom:calc(var(--sw) * .009);z-index:5;width:calc(50vw - var(--sw) / 2 + var(--sw) * .32);height:calc(var(--sw) * .042);background:var(--orange);border-radius:0 calc(var(--sw) * .021) calc(var(--sw) * .021) 0;box-shadow:0 0 0 calc(var(--sw) * .0025) rgba(255,255,255,.85),0 calc(var(--sw) * .004) calc(var(--sw) * .012) rgba(11,45,115,.35)}
-  .ribbon .mapel{position:absolute;top:0;bottom:0;left:calc(50vw - var(--sw) / 2 + var(--sw) * .014);width:calc(var(--sw) * .26);display:flex;align-items:center;color:var(--navy);font-weight:800;text-align:left;line-height:1.15}
+  /* Pil mata pelajaran di tengah bawah (menimpa bilah biru), lebar mengikuti teks */
+  .ribbon{position:fixed;left:0;right:0;margin:0 auto;width:fit-content;min-width:calc(var(--sw) * .2);max-width:calc(var(--sw) * .5);bottom:calc(var(--sw) * .009);z-index:5;height:calc(var(--sw) * .042);padding:0 calc(var(--sw) * .03);display:flex;align-items:center;justify-content:center;background:var(--orange);border-radius:calc(var(--sw) * .021);box-shadow:0 0 0 calc(var(--sw) * .0025) rgba(255,255,255,.85),0 calc(var(--sw) * .004) calc(var(--sw) * .012) rgba(11,45,115,.35)}
+  .ribbon .mapel{display:flex;align-items:center;justify-content:center;color:var(--navy);font-weight:800;text-align:center;line-height:1.15}
   .ribbon .mapel span{flex:none}
+  /* Aksen diagonal di kedua pojok bawah */
+  .accent{position:fixed;bottom:0;z-index:5;width:calc(var(--sw) * .1);height:calc(var(--sw) * .05);background:var(--orange)}
+  .accent::after{content:"";position:absolute;inset:0;background:#fff}
+  .accent-l{left:0;clip-path:polygon(0 0,30% 0,100% 100%,0 100%)}
+  .accent-l::after{clip-path:polygon(26% 0,30% 0,100% 100%,96% 100%)}
+  .accent-r{right:0;clip-path:polygon(100% 0,70% 0,0 100%,100% 100%)}
+  .accent-r::after{clip-path:polygon(74% 0,70% 0,0 100%,4% 100%)}
 
   /* Header */
   .header{
@@ -120,9 +127,9 @@
   /* Loading / error */
   .skeleton{color:transparent!important;position:relative;background:linear-gradient(90deg,#dbe8f8 25%,#f0f6fd 50%,#dbe8f8 75%);background-size:200% 100%;animation:sh 1.2s infinite;border-radius:.6cqw}
   @keyframes sh{to{background-position:-200% 0}}
-  .status{position:absolute;left:50%;transform:translateX(-50%);bottom:4.4cqw;font-weight:700;font-size:1.3cqw;
-    padding:.4cqw 1.6cqw;border-radius:2cqw;background:#fff;color:var(--navy);box-shadow:0 .3cqw 1cqw rgba(0,0,0,.15);transition:opacity .3s}
-  .status.error{background:#fde8e8;color:#9b1c1c}
+  .status{position:fixed;right:calc(50vw - var(--sw) / 2 + var(--sw) * .014);bottom:calc(var(--sw) * .016);z-index:6;font-family:Arial,Helvetica,sans-serif;font-weight:400;font-size:calc(var(--sw) * .015);line-height:1.2;
+    padding:calc(var(--sw) * .0035) calc(var(--sw) * .011);background:#ffc000;color:#000;border:calc(var(--sw) * .0015) solid #1f3864;white-space:nowrap;transition:opacity .3s}
+  .status.error{color:#8b0000;border-color:#c00000}
   .status.hide{opacity:0;pointer-events:none}
   @media (prefers-reduced-motion:reduce){.skeleton{animation:none}}
 </style>
@@ -182,10 +189,11 @@
   </section>
 
   <div class="bot-bar"></div>
-  <div class="status" id="status">Memuat data...</div>
 </main>
 
+<div class="accent accent-l"></div><div class="accent accent-r"></div>
 <div class="ribbon"><div class="mapel"><span id="mapel"></span></div></div>
+<div class="status" id="status">Memuat data…</div>
 
 <script>
   // ====== GANTI URL INI dengan URL Web App Google Apps Script Anda ======
@@ -261,7 +269,7 @@
   function fitMapel(){
     const el = $("mapel"), box = el.parentElement, full = (el.dataset.full || "").trim();
     if(!full){ el.textContent = ""; return; }
-    const sw = $("stage").getBoundingClientRect().width, W = box.clientWidth;
+    const sw = $("stage").getBoundingClientRect().width, W = $("stage").getBoundingClientRect().width * .44;
     const maxF = sw * .028, minOne = sw * .02, maxTwo = sw * .0235;
     const measure = txt => { el.textContent = txt; el.style.whiteSpace = "pre"; el.style.fontSize = "100px"; return el.getBoundingClientRect().width; };
     let w = measure(full), size = Math.min(maxF, 100 * W / w);
@@ -276,7 +284,7 @@
           pos += 1;
         }
         w = measure(words.slice(0, best + 1).join(" ") + "\n" + words.slice(best + 1).join(" "));
-        size = Math.min(maxTwo, 100 * W / w, box.clientHeight * .86 / (2 * 1.15));
+        size = Math.min(maxTwo, 100 * W / w, sw * .042 * .86 / (2 * 1.15));
       }
     }
     el.style.fontSize = size + "px";
@@ -320,7 +328,7 @@
       $("status").classList.add("hide");
     }catch(err){
       console.error("Gagal memuat data:", err);
-      setStatus(hasData ? "Gagal memperbarui data, menampilkan data terakhir" : `Gagal memuat data: ${err.message}`, true);
+      setStatus(hasData ? "Gagal memperbarui…" : "Gagal memuat data", true);
     }
   }
   loadData();
