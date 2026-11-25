@@ -44,9 +44,8 @@
     background:linear-gradient(115deg,transparent 0 40%,#12408f 40% 62%,var(--orange) 62% 80%,#fff 80% 83%,#2a93f2 83%)}
   .bot-bar{position:absolute;left:0;right:0;bottom:0;height:3.6cqw;background:linear-gradient(180deg,#1b6fd6,#0b3a8c);border-top:.25cqw solid rgba(255,255,255,.7)}
   /* Pita oranye mata pelajaran: satu elemen dari tepi kiri layar, tanpa sambungan di batas stage */
-  .ribbon{position:fixed;left:0;bottom:0;z-index:5;width:calc(50vw - var(--sw) / 2 + var(--sw) * .38);height:calc(var(--sw) * .062);background:var(--orange);clip-path:polygon(0 0,calc(100% - var(--sw) * .112) 0,100% 100%,0 100%)}
-  .ribbon::after{content:"";position:absolute;inset:0;background:#fff;clip-path:polygon(calc(100% - var(--sw) * .1084) 0,calc(100% - var(--sw) * .103) 0,100% 100%,calc(100% - var(--sw) * .0054) 100%);opacity:.9}
-  .ribbon .mapel{position:absolute;top:0;bottom:0;left:calc(50vw - var(--sw) / 2 + var(--sw) * .014);width:calc(var(--sw) * .24);display:flex;align-items:center;color:var(--navy);font-weight:800;text-align:left;line-height:1.15}
+  .ribbon{position:fixed;left:0;bottom:calc(var(--sw) * .009);z-index:5;width:calc(50vw - var(--sw) / 2 + var(--sw) * .32);height:calc(var(--sw) * .042);background:var(--orange);border-radius:0 calc(var(--sw) * .021) calc(var(--sw) * .021) 0;box-shadow:0 0 0 calc(var(--sw) * .0025) rgba(255,255,255,.85),0 calc(var(--sw) * .004) calc(var(--sw) * .012) rgba(11,45,115,.35)}
+  .ribbon .mapel{position:absolute;top:0;bottom:0;left:calc(50vw - var(--sw) / 2 + var(--sw) * .014);width:calc(var(--sw) * .26);display:flex;align-items:center;color:var(--navy);font-weight:800;text-align:left;line-height:1.15}
   .ribbon .mapel span{flex:none}
 
   /* Header */
