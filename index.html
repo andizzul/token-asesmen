@@ -75,6 +75,24 @@
   .time{font-weight:800;font-size:3.2cqw;line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
   .sec{color:#14a44d}
   .date{font-weight:600;font-size:1.45cqw;margin-top:.5cqw;white-space:nowrap}
+  /* Hitung mundur: tampil hanya saat waktu_selesai diisi */
+  .cd-wrap,.mini{display:none}
+  .stage.cd .clock-wrap{display:none}
+  .stage.cd .cd-wrap{display:flex;flex-direction:column;align-items:center;border-left:.18cqw solid var(--navy);padding-left:2.2cqw}
+  .stage.cd .mini{display:block}
+  .cd-title{font-weight:800;font-size:1.3cqw;line-height:1.2;letter-spacing:.04em;color:var(--navy)}
+  .cd-row{display:flex;align-items:center;margin:.2cqw 0}
+  .cd-unit{display:flex;flex-direction:column;align-items:center}
+  .cd-box{width:4.6cqw;height:3.4cqw;display:flex;align-items:center;justify-content:center;border-radius:.8cqw;background:#0c2f72;color:#fff;font-weight:800;font-size:2.5cqw;line-height:1;font-variant-numeric:tabular-nums;transition:background .4s}
+  .cd-lbl{font-weight:700;font-size:1cqw;line-height:1.2;margin-top:.25cqw;color:var(--navy)}
+  .cd-sep{font-weight:800;font-size:2.2cqw;line-height:1;margin:0 .7cqw;padding-bottom:1.45cqw;color:var(--navy)}
+  .cd-wrap.y .cd-box{background:#f5a800;color:#0b2d73}
+  .cd-wrap.o .cd-box{background:#e4600a}
+  .cd-wrap.r .cd-box{background:#d7141f}
+  .cd-over{display:none;align-items:center;justify-content:center;width:17.5cqw;height:4.6cqw;border-radius:.9cqw;background:#d7141f;color:#fff;font-weight:800;font-size:1.9cqw;letter-spacing:.03em}
+  .cd-wrap.done .cd-title,.cd-wrap.done .cd-row{display:none}
+  .cd-wrap.done .cd-over{display:flex}
+  .mini{margin:0 1.6cqw .9cqw;font-weight:600;font-size:1.45cqw;line-height:1.2;color:#000;white-space:nowrap;font-variant-numeric:tabular-nums}
 
   /* Label TOKEN */
   .label-row{position:absolute;top:14.6cqw;left:0;right:0;height:5cqw;display:flex;align-items:flex-end;justify-content:center}
@@ -154,9 +172,20 @@
         <div class="date" id="date">&nbsp;</div>
       </div>
     </div>
+    <div class="cd-wrap" id="cdWrap">
+      <div class="cd-title">SISA WAKTU</div>
+      <div class="cd-row">
+        <div class="cd-unit"><div class="cd-box" id="cdH">00</div><div class="cd-lbl">JAM</div></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit"><div class="cd-box" id="cdM">00</div><div class="cd-lbl">MENIT</div></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit"><div class="cd-box" id="cdS">00</div><div class="cd-lbl">DETIK</div></div>
+      </div>
+      <div class="cd-over">WAKTU HABIS</div>
+    </div>
   </header>
 
-  <div class="label-row"><div class="label">TOKEN</div></div>
+  <div class="label-row"><span class="mini" id="miniDate"></span><div class="label">TOKEN</div><span class="mini" id="miniClock"></span></div>
 
   <section class="token-card"><div class="token skeleton" id="token">------</div></section>
 
@@ -228,11 +257,49 @@
   const HARI = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
   const BULAN = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 
+  /* ---------- Hitung mundur (kolom waktu_selesai) ---------- */
+  const BULAN3 = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+  let endMs = null, cdActive = false;
+  function parseEnd(raw){
+    const s = String(raw == null ? "" : raw).trim();
+    if(!s) return null;
+    const T = "(\\d{1,2})[:.](\\d{2})(?:[:.](\\d{2}))?";
+    let y, mo, d, h, mi, se, m;
+    const n = new Date();
+    if((m = s.match(new RegExp("^(\\d{4})-(\\d{1,2})-(\\d{1,2})[ T]+" + T + "$")))){ y = +m[1]; mo = +m[2]; d = +m[3]; h = +m[4]; mi = +m[5]; se = +(m[6] || 0); }
+    else if((m = s.match(new RegExp("^(\\d{1,2})[/-](\\d{1,2})[/-](\\d{4})[ T]+" + T + "$")))){ d = +m[1]; mo = +m[2]; y = +m[3]; h = +m[4]; mi = +m[5]; se = +(m[6] || 0); }
+    else if((m = s.match(new RegExp("^" + T + "$")))){ y = n.getFullYear(); mo = n.getMonth() + 1; d = n.getDate(); h = +m[1]; mi = +m[2]; se = +(m[3] || 0); }
+    else return null;
+    if(h > 23 || mi > 59 || se > 59) return null;
+    const dt = new Date(y, mo - 1, d, h, mi, se);
+    return (dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === d) ? dt : null;
+  }
+  function setEnd(raw){ const dt = parseEnd(raw); endMs = dt ? dt.getTime() : null; }
+  function updateCountdown(d){
+    const day = x => new Date(x).setHours(0,0,0,0);
+    const active = endMs !== null && day(endMs) >= day(d.getTime()); // tanggal lampau dianggap tidak diatur
+    $("stage").classList.toggle("cd", active);
+    if(active !== cdActive){ cdActive = active; fitAll(); }
+    if(!active) return;
+    const rem = endMs - d.getTime(), done = rem <= 0, wrap = $("cdWrap"), p = n => String(n).padStart(2,"0");
+    const secs = done ? 0 : Math.ceil(rem / 1000);
+    wrap.classList.toggle("done", done);
+    wrap.classList.toggle("y", !done && secs <= 600 && secs > 300);
+    wrap.classList.toggle("o", !done && secs <= 300 && secs > 60);
+    wrap.classList.toggle("r", !done && secs <= 60);
+    $("cdH").textContent = p(Math.floor(secs / 3600));
+    $("cdM").textContent = p(Math.floor(secs % 3600 / 60));
+    $("cdS").textContent = p(secs % 60);
+    $("miniDate").textContent = `${p(d.getDate())} ${BULAN3[d.getMonth()]} ${d.getFullYear()}`;
+    $("miniClock").textContent = `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  }
+
   /* ---------- Jam & tanggal real-time ---------- */
   function tick(){
     const d = new Date(), p = n => String(n).padStart(2,"0");
     $("clock").innerHTML = `${p(d.getHours())}:${p(d.getMinutes())}:<span class="sec">${p(d.getSeconds())}</span>`;
     $("date").textContent = `${HARI[d.getDay()]}, ${p(d.getDate())} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
+    updateCountdown(d);
   }
   tick(); setInterval(tick, 1000);
 
@@ -259,6 +326,7 @@
     $("alamatSekolah").textContent = String(data.alamat_sekolah ?? "").trim();
     $("npsnSekolah").textContent = String(data.npsn ?? "").trim();
     $("mapel").dataset.full = String(data.mata_pelajaran ?? "").trim();
+    setEnd(data.waktu_selesai); updateCountdown(new Date());
     if(data.url_logo){
       const img = $("logo");
       img.onload = () => { img.hidden = false; $("logoPh").hidden = true; };
