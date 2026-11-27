@@ -17,7 +17,7 @@
   body{display:flex;align-items:center;justify-content:center}
   /* Perluasan latar ke seluruh layar (di luar stage 16:9) */
   body{
-    --sw:min(100vw,calc(100vh * 16 / 9));
+    --sw:min(100vw,calc(var(--vh,1vh) * 100 * 16 / 9));
     background:
       linear-gradient(90deg,#0b4fb3 calc(50% - var(--sw) / 2),#2a93f2 calc(50% + var(--sw) / 2)) top/100% calc(var(--sw) * .032) no-repeat,
       linear-gradient(rgba(255,255,255,.7),rgba(255,255,255,.7)) left 0 bottom calc(var(--sw) * .0335)/100% calc(var(--sw) * .0025) no-repeat,
@@ -27,7 +27,7 @@
 
   /* Stage 16:9 — semua ukuran memakai cqw (persen lebar stage) */
   .stage{
-    position:relative; width:min(100vw, calc(100vh * 16 / 9)); aspect-ratio:16/9;
+    position:relative; width:min(100vw, calc(var(--vh,1vh) * 100 * 16 / 9)); aspect-ratio:16/9;
     container-type:size; overflow:hidden; color:var(--navy);
     background:linear-gradient(180deg,#e9f4ff 0%,#bcdcfa 40%,#8fc3f5 100%);
   }
@@ -200,6 +200,29 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbxVWdvJ1CQ04Yv3GnP3IaqdgPn7LJ8kJIYiLXOGySv92KZ2yPTkmH3I1JpJfkIw3bBu/exec";
   // Interval pembaruan otomatis data (ms). Isi 0 untuk menonaktifkan.
   const REFRESH_MS = 15000;
+
+  /* ---------- Tinggi area terlihat (toolbar browser) & layar penuh ketuk dua kali ---------- */
+  function setVh(){ document.documentElement.style.setProperty("--vh", (window.innerHeight / 100) + "px"); }
+  setVh();
+  window.addEventListener("resize", setVh);
+  window.addEventListener("orientationchange", setVh);
+  document.addEventListener("fullscreenchange", setVh);
+  document.addEventListener("webkitfullscreenchange", setVh);
+  let lastTap = 0, lastX = 0, lastY = 0;
+  function toggleFullscreen(){
+    const d = document, el = d.documentElement;
+    try{
+      let p;
+      if(d.fullscreenElement || d.webkitFullscreenElement) p = (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+      else p = (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+      if(p && p.catch) p.catch(err => console.error("Layar penuh gagal:", err));
+    }catch(err){ console.error("Layar penuh tidak didukung:", err); }
+  }
+  document.addEventListener("pointerup", e => {
+    const now = Date.now();
+    if(now - lastTap < 400 && Math.abs(e.clientX - lastX) < 40 && Math.abs(e.clientY - lastY) < 40){ lastTap = 0; toggleFullscreen(); }
+    else{ lastTap = now; lastX = e.clientX; lastY = e.clientY; }
+  });
 
   const $ = id => document.getElementById(id);
   const HARI = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
